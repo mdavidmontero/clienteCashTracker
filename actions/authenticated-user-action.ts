@@ -1,5 +1,6 @@
 "use server";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { ErrorResponseSchema, LoginSchema } from "@/src/schemas";
 type ActionStateType = {
   errors: string[];
@@ -48,7 +49,5 @@ export async function authenticated(
     path: "/",
   });
 
-  return {
-    errors: [],
-  };
+  redirect("/admin");
 }

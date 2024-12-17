@@ -1,10 +1,38 @@
-export default function ResetPasswordForm() {
+"use client";
+import { useRouter } from "next/navigation";
+import { resetPassword } from "@/actions/reset-password-action";
+import { useEffect } from "react";
+import { useFormState } from "react-dom";
+import { toast } from "react-toastify";
+
+export default function ResetPasswordForm({ token }: { token: string }) {
+  const router = useRouter();
+  const tokenConfirm = resetPassword.bind(null, token);
+  const [state, dispatch] = useFormState(tokenConfirm, {
+    errors: [],
+    success: "",
+  });
+
+  useEffect(() => {
+    if (state.errors) {
+      state.errors.forEach((error) => {
+        toast.error(error);
+      });
+    }
+    if (state.success) {
+      toast.success(state.success, {
+        onClose: () => {
+          router.push("/auth/login");
+        },
+        onClick: () => {
+          router.push("/auth/login");
+        },
+      });
+    }
+  }, [state]);
+
   return (
-    <form
-      className=" mt-14 space-y-5"
-      noValidate
-      // action={dispatch}
-    >
+    <form className=" mt-14 space-y-5" noValidate action={dispatch}>
       <div className="flex flex-col gap-5">
         <label className="font-bold text-2xl">Password</label>
 

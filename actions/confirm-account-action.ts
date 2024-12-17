@@ -38,7 +38,6 @@ export async function confirmAccount(
     };
   }
   const success = SuccessSchema.parse(json);
-  console.log(json);
   return {
     errors: [],
     success,

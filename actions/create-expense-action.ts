@@ -2,7 +2,7 @@
 
 import getToken from "@/src/auth/token";
 import {
-  DraftBudgetSchema,
+  DraftExpenseSchema,
   ErrorResponseSchema,
   SuccessSchema,
 } from "@/src/schemas";
@@ -12,24 +12,25 @@ type ActionStateType = {
   errors: string[];
   success: string;
 };
-
-export async function createBudget(
+export default async function createExpense(
+  budgetId: number,
   prevState: ActionStateType,
   formData: FormData
 ) {
-  const budget = DraftBudgetSchema.safeParse({
+  const expenseData = {
     name: formData.get("name"),
     amount: formData.get("amount"),
-  });
-  if (!budget.success) {
+  };
+  const expense = DraftExpenseSchema.safeParse(expenseData);
+  if (!expense.success) {
     return {
-      errors: budget.error.issues.map((issue) => issue.message),
+      errors: expense.error.issues.map((issue) => issue.message),
       success: "",
     };
   }
 
   const token = getToken();
-  const url = `${process.env.API_URL}/budgets`;
+  const url = `${process.env.API_URL}/budgets/${budgetId}/expenses`;
   const req = await fetch(url, {
     method: "POST",
     headers: {
@@ -37,10 +38,11 @@ export async function createBudget(
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({
-      name: budget.data.name,
-      amount: budget.data.amount,
+      name: expense.data.name,
+      amount: expense.data.amount,
     }),
   });
+
   const json = await req.json();
   if (!req.ok) {
     const { error } = ErrorResponseSchema.parse(json);
@@ -49,8 +51,7 @@ export async function createBudget(
       success: "",
     };
   }
-
-  revalidatePath("/admin");
+  revalidatePath(`admin/budgets/${budgetId}`);
   const success = SuccessSchema.parse(json);
 
   return {

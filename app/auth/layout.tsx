@@ -1,12 +1,18 @@
 import Logo from "@/components/ui/Logo";
 import ToastNotification from "@/components/ui/ToastNotification";
+import { verifySession } from "@/src/auth/dalt";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
-export default function AuthLayout({
+export default async function AuthLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const { user } = await verifySession();
+  if (user) {
+    redirect("/admin");
+  }
   return (
     <>
       <div className="lg:grid lg:grid-cols-2 lg:min-h-screen">

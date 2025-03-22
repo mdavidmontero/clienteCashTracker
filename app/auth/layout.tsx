@@ -1,16 +1,33 @@
 import Logo from "@/components/ui/Logo";
 import ToastNotification from "@/components/ui/ToastNotification";
-import { verifySession } from "@/src/auth/dalt";
+import getToken from "@/src/auth/token";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+
+async function getUserActive() {
+  const token = getToken();
+  const url = `${process.env.API_URL}/auth/user`;
+  const req = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  const res = await req.json();
+
+  if (res.id) {
+    return true;
+  } else if (res.error) {
+    return false;
+  }
+}
 
 export default async function AuthLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { user } = await verifySession();
-  if (user) {
+  const isAuth = await getUserActive();
+  if (isAuth) {
     redirect("/admin");
   }
   return (
